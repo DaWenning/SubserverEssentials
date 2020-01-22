@@ -1,0 +1,10 @@
+modLoader="javafml"
+loaderVersion="[30,)"
+[[mods]] 
+modId="subserveressentials"
+version="1.0.1" 
+displayName="SubserverEssentials"
+authors="recklessGreed"
+description='''
+A simple mod that allows you to shift right click (with a stick) on a horse to see it's stats.
+'''
