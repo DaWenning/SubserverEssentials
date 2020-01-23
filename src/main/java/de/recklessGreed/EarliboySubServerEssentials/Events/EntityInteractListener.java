@@ -24,7 +24,7 @@ public class EntityInteractListener {
 
             PlayerEntity player = event.getPlayer();
             AbstractHorseEntity horseEntity = (AbstractHorseEntity) event.getTarget();
-            if (player.isCrouching() && player.getHeldItemMainhand().getItem() == Items.STICK) {
+            if (player.isCrouching() && (player.getHeldItemMainhand().getItem() == Items.STICK || player.getHeldItemMainhand().getItem() == Items.SHIELD)) {
                 player.sendMessage(new HorseStats().getHorseStats(horseEntity));
                 event.setCancellationResult(ActionResultType.SUCCESS);
                 event.setResult(Event.Result.DENY);
