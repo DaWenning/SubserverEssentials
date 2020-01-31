@@ -1,23 +1,10 @@
 package de.recklessGreed.EarliboySubServerEssentials;
 
+import de.recklessGreed.EarliboySubServerEssentials.utils.MinecraftProfile;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.passive.horse.AbstractHorseEntity;
-import net.minecraft.entity.passive.horse.DonkeyEntity;
-import net.minecraft.entity.passive.horse.HorseEntity;
-import net.minecraft.entity.passive.horse.LlamaEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Items;
+import net.minecraft.entity.passive.horse.*;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent.EntityInteract;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-
-import javax.xml.soap.Text;
-import java.awt.*;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.StringSelection;
+import java.util.UUID;
 
 
 public class HorseStats {
@@ -28,8 +15,9 @@ public class HorseStats {
 	private final TextFormatting UNCOMMON  = TextFormatting.WHITE;
 	private final TextFormatting COMMON    = TextFormatting.GRAY;
 
+	public String[] getHorseStats(AbstractHorseEntity horseEntity){
 
-	public TranslationTextComponent getHorseStats(AbstractHorseEntity horseEntity){
+		String[] returner = new String[5];
 		TextFormatting colourHealth = TextFormatting.WHITE;
 		TextFormatting colourSpeed = TextFormatting.WHITE;
 		TextFormatting colourJump = TextFormatting.WHITE;
@@ -37,9 +25,18 @@ public class HorseStats {
 		double speed = horseEntity.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getValue();
 		double jump = horseEntity.getHorseJumpStrength();
 		String variantName = "";
+		UUID ownerUUID = horseEntity.getOwnerUniqueId();
+		MinecraftProfile profile = new MinecraftProfile(ownerUUID);
+		String owner = profile.getUsername();
 		if (horseEntity instanceof DonkeyEntity)
 		{
 			variantName = "Donkey";
+		}
+		else if (horseEntity instanceof LlamaEntity) {
+			variantName = "Llama";
+		}
+		else if (horseEntity instanceof MuleEntity) {
+			variantName = "Maultier";
 		}
 		else {
 			HorseEntity entity = (HorseEntity) horseEntity;
@@ -85,6 +82,14 @@ public class HorseStats {
 			colourJump = LEGENDARY;
 		}
 
+		int healthVal = (int) Math.round(health);
+		returner[SubserverEssentials.HorseArray.OWNER.ordinal()]       = owner == null ? "Untamed" : "Owner: " + owner;
+		returner[SubserverEssentials.HorseArray.VARIANT.ordinal()]     = variantName;
+		returner[SubserverEssentials.HorseArray.HEALTH.ordinal()]      = "    " + colourHealth + "Health:   " + healthVal + " Points or " + (int)(healthVal / 2) + " Hearts" ;
+		returner[SubserverEssentials.HorseArray.JUMP_HEIGHT.ordinal()] = "    " + colourJump   + "Jump:     " + round(jump) + " Blocks";
+		returner[SubserverEssentials.HorseArray.SPEED.ordinal()]       = "    " + colourSpeed  + "Speed:   " + round(speed) + " Blocks per Second";
+
+
 		if (horseEntity instanceof LlamaEntity) {
 			TextFormatting colourSlots = TextFormatting.WHITE;
 			double slots = ((LlamaEntity) horseEntity).getStrength();
@@ -103,19 +108,23 @@ public class HorseStats {
 				colourSlots = LEGENDARY;
 			}
 
-			return new TranslationTextComponent(String.format("Variant: %s %sHealth: %.0f %sSpeed: %.1f %sChest Slots: %.0f",variantName, colourHealth, health, colourSpeed, speed, colourSlots, slots));
+			return returner;
 
 		} else {
+
+
+
 			//player.sendStatusMessage(new TranslationTextComponent(String.format("%sHealth: %.0f %sSpeed: %.1f %sJump Height: %.1f", colourHealth, health, colourSpeed, speed, colourJump, jump)), true);
 			System.setProperty("java.awt.headless", "false");
-			Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-			clipboard.setContents(new StringSelection(String.format("%.0f %.1f %.1f", health, speed, jump)), null);
-			return new TranslationTextComponent(String.format("Variant: %s %sHealth: %.0f %sSpeed: %.1f %sJump Height: %.1f",variantName, colourHealth, health, colourSpeed, speed, colourJump, jump));
+			//Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+			//clipboard.setContents(new StringSelection(String.format("%.0f %.1f %.1f", health, speed, jump)), null);
+			return returner;
+			//return new TranslationTextComponent(String.format("Owner: %s ; Variant: %s %sHealth: %.0f %sSpeed: %.1f %sJump Height: %.1f", owner, variantName, colourHealth, health, colourSpeed, speed, colourJump, jump));
 
 		}
 	}
 
-	public String getVariantName(int variant) {
+	String getVariantName(int variant) {
 
 		String c;
 		String v;
@@ -147,5 +156,9 @@ public class HorseStats {
 		}
 
 		return c + " with " + v;
+	}
+
+	double round(double val) {
+		return Math.round(100.0 * val) / 100.0;
 	}
 }
